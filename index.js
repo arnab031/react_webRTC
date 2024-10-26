@@ -41,6 +41,11 @@ io.on("connection", (socket) => {
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
 
+  socket.on("camera:switched", ({ to }) => {
+    const email = socketIdToEmailMap.get(socket.id);
+    io.to(to).emit("camera:switched", { from: socket.id, email });
+  });
+
   socket.on("call:ended", ({ to }) => {
     const email = socketIdToEmailMap.get(to);
     emailToSocketIdMap.delete(email);
