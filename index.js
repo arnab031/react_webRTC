@@ -19,20 +19,33 @@ io.on("connection", (socket) => {
   });
 
   socket.on("user:call", ({ to, offer }) => {
-    io.to(to).emit("incomming:call", { from: socket.id, offer });
+    const email = socketIdToEmailMap.get(socket.id);
+    console.log("user:call", email);
+
+    io.to(to).emit("incomming:call", { from: socket.id, offer, email });
   });
 
   socket.on("call:accepted", ({ to, ans }) => {
-    io.to(to).emit("call:accepted", { from: socket.id, ans });
+    const email = socketIdToEmailMap.get(socket.id);
+    console.log("call:accepted", email);
+    io.to(to).emit("call:accepted", { from: socket.id, ans, email });
   });
 
   socket.on("peer:nego:needed", ({ to, offer }) => {
-    console.log("peer:nego:needed", offer);
+    // console.log("peer:nego:needed", offer);
     io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
   });
 
   socket.on("peer:nego:done", ({ to, ans }) => {
-    console.log("peer:nego:done", ans);
+    // console.log("peer:nego:done", ans);
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
+  });
+
+  socket.on("call:ended", ({ to }) => {
+    const email = socketIdToEmailMap.get(to);
+    emailToSocketIdMap.delete(email);
+    socketIdToEmailMap.delete(to);
+    io.to(to).emit("call:ended", { from: socket.id });
+    console.log(`Socket Disconnected`, to);
   });
 });
